@@ -1,10 +1,10 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 User = get_user_model()
 
-class UserRegisterForm(UserCreationForm):
+class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     phone_number = forms.CharField(max_length=20, required=False)
 
@@ -12,14 +12,5 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email']
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-            # Create or update profile
-            if hasattr(user, 'profile'):
-                user.profile.phone_number = self.cleaned_data.get('phone_number')
-                user.profile.save()
-        return user
-    
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(max_length=150)

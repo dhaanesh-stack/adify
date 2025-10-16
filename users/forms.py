@@ -10,7 +10,7 @@ class UserRegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'phone_number', 'password1', 'password2']
+        fields = ['username', 'email']
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -22,3 +22,4 @@ class UserRegisterForm(UserCreationForm):
                 user.profile.phone_number = self.cleaned_data.get('phone_number')
                 user.profile.save()
         return user
+    

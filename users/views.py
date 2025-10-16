@@ -5,10 +5,16 @@ from django.contrib import messages
 from .forms import UserRegisterForm
 
 def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            phone_number = form.cleaned_data.get('phone_number')
+            if phone_number and hasattr(user, 'profile'):
+                user.profile.phone_number = phone_number
+                user.profile.save()
             login(request, user)
             messages.success(request, 'Registration successful!')
             return redirect('home')
@@ -25,12 +31,13 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {username}!')
                 return redirect('home')
-        messages.error(request, 'Invalid username or password.')
+            else:
+                messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html', {'form': form})

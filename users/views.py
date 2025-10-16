@@ -20,19 +20,17 @@ def register_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('home')
+
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {username}!')
-                return redirect('home')
-        messages.error(request, 'Invalid username or password.')
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f"Welcome back, {user.username}!")
+            return redirect('home')
     else:
         form = AuthenticationForm()
+    
     return render(request, 'users/login.html', {'form': form})
 
 

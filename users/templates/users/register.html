@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Register | Adify{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white shadow-md rounded-xl p-6">
+  <h2 class="text-2xl font-semibold text-center text-indigo-600 mb-6">Create an Account</h2>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    {% for field in form %}
+      <div>
+        <label class="block text-gray-700 font-medium mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ field.errors|join:", " }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition">
+      Register
+    </button>
+  </form>
+
+  <p class="text-sm text-gray-600 text-center mt-4">
+    Already have an account?
+    <a href="{% url 'login' %}" class="text-indigo-600 hover:underline">Login here</a>
+  </p>
+</div>
+{% endblock %}

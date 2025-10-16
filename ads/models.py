@@ -2,18 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Predefined categories
-CATEGORY_CHOICES = [
-    ('job', 'Job'),
-    ('gig', 'Gig'),
-    ('rental', 'Rental'),
-    ('sale', 'For Sale'),
-    ('service', 'Service'),
-    ('event', 'Event'),
-]
+class CategoryType(models.TextChoices):
+    JOB = 'job', 'Job'
+    GIG = 'gig', 'Gig'
+    RENTAL = 'rental', 'Rental'
+    SALE = 'sale', 'For Sale'
+    SERVICE = 'service', 'Service'
+    EVENT = 'event', 'Event'
 
 class Category(models.Model):
     """Represents a predefined ad category."""
-    name = models.CharField(max_length=50, choices=CATEGORY_CHOICES, unique=True)
+    name = models.CharField(max_length=50, choices=CategoryType.choices, unique=True)
 
     class Meta:
         verbose_name_plural = "Categories"

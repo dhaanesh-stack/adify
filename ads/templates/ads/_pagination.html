@@ -1,0 +1,22 @@
+{% load static %}
+{% if is_paginated %}
+  <div class="flex justify-center items-center mt-10 space-x-2">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" 
+         class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+        Previous
+      </a>
+    {% endif %}
+
+    <span class="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg font-medium">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" 
+         class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+        Next
+      </a>
+    {% endif %}
+  </div>
+{% endif %}

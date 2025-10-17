@@ -2,12 +2,8 @@ from django.views.generic import ListView
 from ads.models import Ad
 
 class HomeView(ListView):
-    """
-    Public homepage that lists all ads with pagination.
-    Anonymous users can view ads.
-    """
     model = Ad
-    template_name = "home.html"
+    template_name = "ads/home.html"
     context_object_name = "ads"
     paginate_by = 6 
 

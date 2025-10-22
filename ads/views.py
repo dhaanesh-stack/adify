@@ -1,3 +1,66 @@
-from django.shortcuts import render
+from django.shortcuts import redirect
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib import messages
 
-# Create your views here.
+from .models import Ad
+from .forms import AdForm
+
+
+class AdListView(ListView):
+    model = Ad
+    template_name = 'ads/ad_list.html'  
+    context_object_name = 'ads'
+    ordering = ['-created_at']
+    paginate_by = 6
+
+
+class PostAdView(LoginRequiredMixin, CreateView):
+    model = Ad
+    form_class = AdForm
+    template_name = 'ads/post_ad.html'
+    success_url = reverse_lazy('my_ads')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        messages.success(self.request, "Your ad has been posted successfully!")
+        return super().form_valid(form)
+
+
+class MyAdsView(LoginRequiredMixin, ListView):
+    model = Ad
+    template_name = 'ads/my_ads.html'
+    context_object_name = 'ads'
+
+    def get_queryset(self):
+        return Ad.objects.filter(user=self.request.user).order_by('-created_at')
+
+
+class AdUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Ad
+    form_class = AdForm
+    template_name = 'ads/edit_ad.html'
+    success_url = reverse_lazy('my_ads')
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your ad has been updated successfully!")
+        return super().form_valid(form)
+
+    def test_func(self):
+        ad = self.get_object()
+        return self.request.user == ad.user
+
+
+class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Ad
+    template_name = 'ads/confirm_delete.html'
+    success_url = reverse_lazy('my_ads')
+
+    def test_func(self):
+        ad = self.get_object()
+        return self.request.user == ad.user
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Your ad has been deleted successfully!")
+        return super().delete(request, *args, **kwargs)

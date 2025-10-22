@@ -26,7 +26,7 @@ class AdsTests(TestCase):
     def test_post_ad_login_required(self):
         url = reverse("post_ad")
         response = self.client.get(url)
-        self.assertRedirects(response, f"/users/login/?next={url}")
+        self.assertRedirects(response, f"{reverse('login')}?next={url}")
 
     def test_post_ad_creation_success(self):
         self.client.login(username="testuser", password="testpass")

@@ -3,28 +3,28 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
-
+from django.contrib.messages.views import SuccessMessageMixin
 from .models import Ad
 from .forms import AdForm
 
 
 class AdListView(ListView):
     model = Ad
-    template_name = 'ads/ad_list.html'  
+    template_name = 'ads/home.html'  
     context_object_name = 'ads'
     ordering = ['-created_at']
     paginate_by = 6
 
 
-class PostAdView(LoginRequiredMixin, CreateView):
+class PostAdView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Ad
     form_class = AdForm
     template_name = 'ads/post_ad.html'
     success_url = reverse_lazy('my_ads')
+    success_message = "Your ad has been posted successfully!"
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        messages.success(self.request, "Your ad has been posted successfully!")
         return super().form_valid(form)
 
 
@@ -37,16 +37,12 @@ class MyAdsView(LoginRequiredMixin, ListView):
         return Ad.objects.filter(user=self.request.user).order_by('-created_at')
 
 
-class AdUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class AdUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, UpdateView):
     model = Ad
     form_class = AdForm
     template_name = 'ads/edit_ad.html'
     success_url = reverse_lazy('my_ads')
-
-    def form_valid(self, form):
-        messages.success(self.request, "Your ad has been updated successfully!")
-        return super().form_valid(form)
-
+    success_message = "Your ad has been updated successfully!"
     def test_func(self):
         ad = self.get_object()
         return self.request.user == ad.user
@@ -61,6 +57,3 @@ class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         ad = self.get_object()
         return self.request.user == ad.user
 
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Your ad has been deleted successfully!")
-        return super().delete(request, *args, **kwargs)

@@ -11,7 +11,7 @@ class PostAdViewTests(TestCase):
 
     def test_redirect_if_not_logged_in(self):
         response = self.client.get(self.url)
-        self.assertRedirects(response, "/users/login/?next=" + self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
     def test_logged_in_user_can_post_ad(self):
         category = Category.objects.create(name="For sale")
@@ -30,5 +30,7 @@ class PostAdViewTests(TestCase):
                 "contact_phone": "9876543210",
             },
         )
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(Ad.objects.filter(title='New Ad').exists())
+        self.assertRedirects(response, reverse('my_ads'))
+        ad = Ad.objects.get(title="New Ad")
+        self.assertEqual(ad.user, self.user)
+        

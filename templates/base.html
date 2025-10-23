@@ -19,8 +19,9 @@
       <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <a href="{% url 'home' %}" class="text-2xl font-bold text-indigo-600">Adify</a>
 
-        <div class="flex space-x-4">
+        <div class="flex space-x-4 items-center">
           {% if user.is_authenticated %}
+           <a href="{% url 'my_ads' %}" class="text-gray-700 hover:text-indigo-600">My Ads</a>
             <span class="text-gray-700">Welcome, {{ user.username }}</span>
             <form method="post" action="{% url 'logout' %}" class="inline">
               {% csrf_token %}

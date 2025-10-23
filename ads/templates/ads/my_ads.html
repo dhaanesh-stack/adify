@@ -1,30 +1,16 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<div class="max-w-6xl mx-auto p-6">
-  <h1 class="text-2xl font-bold mb-6">My Ads</h1>
+  <div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6">My Ads</h1>
 
-  {% if ads %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for ad in ads %}
-    <div class="bg-white shadow rounded-xl overflow-hidden border">
-      {% if ad.image %}
-      <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-full h-48 object-cover">
-      {% endif %}
-      <div class="p-4">
-        <h2 class="text-lg font-semibold">{{ ad.title }}</h2>
-        <p class="text-gray-700 mb-2">{{ ad.description|truncatechars:100 }}</p>
-        <p class="font-medium text-indigo-600 mb-3">₹{{ ad.price }}</p>
-
-        <div class="flex justify-between">
-          <a href="{% url 'edit_ad' ad.pk %}" class="text-sm text-blue-600 hover:underline">Edit</a>
-          <a href="{% url 'delete_ad' ad.pk %}" class="text-sm text-red-600 hover:underline">Delete</a>
-        </div>
+    {% if ads %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for ad in ads %}
+          {% include "ads/_ad_card.html" %}
+        {% endfor %}
       </div>
-    </div>
-    {% endfor %}
+    {% else %}
+      <p class="text-gray-600">You haven’t posted any ads yet.</p>
+    {% endif %}
   </div>
-  {% else %}
-  <p class="text-gray-600">You haven’t posted any ads yet.</p>
-  {% endif %}
-</div>
 {% endblock %}

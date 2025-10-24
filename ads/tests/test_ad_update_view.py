@@ -17,7 +17,7 @@ class AdUpdateViewTests(TestCase):
 
     def test_redirect_if_not_logged_in(self):
         response = self.client.get(self.url)
-        self.assertRedirects(response, "/users/login/?next=" + self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
 
     def test_owner_can_update(self):
         category = Category.objects.create(name="For sale")
@@ -44,3 +44,9 @@ class AdUpdateViewTests(TestCase):
         self.client.login(username="intruder", password="pass123")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
+
+        post_response = self.client.post(self.url, {"title": "Malicious Update"})
+        self.assertEqual(post_response.status_code, 403)
+
+        self.ad.refresh_from_db()
+        self.assertEqual(self.ad.title, "Old Ad")

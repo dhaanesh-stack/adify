@@ -38,7 +38,7 @@ class AdUpdateView(
         ad = self.get_object()
         return self.request.user == ad.user
 
-class AdDetailView(DetailView):
+class AdDetailView(LoginRequiredMixin,DetailView):
     model = Ad
     template_name = 'ads/ad_detail.html'
     context_object_name = 'ad'

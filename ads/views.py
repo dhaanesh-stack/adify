@@ -43,6 +43,7 @@ class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Ad
     template_name = 'ads/confirm_delete.html'
     success_url = reverse_lazy('my_ads')
+    success_message = "Your ad has been deleted successfully!"
 
     def test_func(self):
         ad = self.get_object()

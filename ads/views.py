@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from .models import Ad
@@ -33,6 +33,16 @@ class AdUpdateView(
     template_name = "ads/edit_ad.html"
     success_url = reverse_lazy("my_ads")
     success_message = "Your ad has been updated successfully!"
+
+    def test_func(self):
+        ad = self.get_object()
+        return self.request.user == ad.user
+
+
+class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Ad
+    template_name = 'ads/confirm_delete.html'
+    success_url = reverse_lazy('my_ads')
 
     def test_func(self):
         ad = self.get_object()

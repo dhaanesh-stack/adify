@@ -5,7 +5,6 @@ from django.urls import reverse_lazy
 from .models import Ad
 from .forms import AdForm
 
-
 class MyAdsView(LoginRequiredMixin, ListView):
     model = Ad
     template_name = 'ads/my_ads.html'
@@ -13,7 +12,6 @@ class MyAdsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Ad.objects.filter(user=self.request.user).order_by('-created_at')
-
 
 class PostAdView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Ad

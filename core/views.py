@@ -11,7 +11,7 @@ class HomeView(ListView):
     def get_queryset(self):
         queryset = (
             Ad.objects.select_related("user", "category")
-            .only("title", "description", "image", "created_at", "user__username", "category__name")
+            .only("title", "description", "price", "location", "image", "created_at", "user__username", "category__name")
             .order_by("-created_at")
         )
         query = self.request.GET.get("q")
@@ -30,9 +30,16 @@ class HomeView(ListView):
             queryset = queryset.filter(location__icontains=location)
 
         if min_price:
-            queryset = queryset.filter(price__gte=min_price)
+            try:
+                queryset = queryset.filter(price__gte=float(min_price))
+            except ValueError:
+                pass  
+
         if max_price:
-            queryset = queryset.filter(price__lte=max_price)
+            try:
+                queryset = queryset.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
 
         return queryset
 

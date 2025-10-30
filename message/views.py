@@ -46,7 +46,7 @@ class InboxView(LoginRequiredMixin, ListView):
 User = get_user_model()
 
 
-class AdChatView(TemplateView):
+class AdChatView(LoginRequiredMixin, TemplateView):
     template_name = "message/chat.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -83,41 +83,34 @@ class AdChatView(TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        if user.id == self.ad.user_id:
+        chat_partner = None
+        if user == self.ad.user:
             if self.buyer_id:
-                buyer = get_object_or_404(User, pk=self.buyer_id)
-                messages = (
-                    Message.objects.filter(ad=self.ad)
-                    .filter(
-                        Q(sender=user, receiver=buyer) | Q(sender=buyer, receiver=user)
-                    )
-                    .order_by("timestamp")
-                )
-                messages.filter(receiver=user, is_read=False).update(is_read=True)
-                context["chat_partner"] = buyer
-            else:
-                messages = Message.objects.none()
-                context["chat_partner"] = None
+                chat_partner = get_object_or_404(User, pk=self.buyer_id)
         else:
+            chat_partner = self.ad.user
+
+        context["chat_partner"] = chat_partner
+
+        if chat_partner:
             messages = (
                 Message.objects.filter(ad=self.ad)
-                .filter(
-                    Q(sender=user, receiver=self.ad.user)
-                    | Q(sender=self.ad.user, receiver=user)
-                )
+                .filter(Q(sender=user, receiver=chat_partner) | Q(sender=chat_partner, receiver=user))
                 .order_by("timestamp")
             )
             messages.filter(receiver=user, is_read=False).update(is_read=True)
-            context["chat_partner"] = self.ad.user
+        else:
+            messages = Message.objects.none()
+
         grouped_messages = defaultdict(list)
         for msg in messages:
             local_date = timezone.localtime(msg.timestamp).date()
             grouped_messages[local_date].append(msg)
+
         context["ad"] = self.ad
-        context["grouped_messages"] = sorted(
-            grouped_messages.items(), key=lambda x: x[0]
-        )
+        context["grouped_messages"] = sorted(grouped_messages.items(), key=lambda item: item[0])
         return context
+
 
     def post(self, request, *args, **kwargs):
         user = request.user

@@ -1,5 +1,6 @@
 from django.views.generic import ListView
-from ads.models import Ad
+from ads.models import Ad, Category
+from django.db.models import Q
 
 class HomeView(ListView):
     model = Ad
@@ -8,8 +9,34 @@ class HomeView(ListView):
     paginate_by = 6 
 
     def get_queryset(self):
-        return (
+        queryset = (
             Ad.objects.select_related("user", "category")
             .only("title", "description", "image", "created_at", "user__username", "category__name")
             .order_by("-created_at")
         )
+        query = self.request.GET.get("q")
+        category = self.request.GET.get("category")
+        min_price = self.request.GET.get("min_price")
+        max_price = self.request.GET.get("max_price")
+        location = self.request.GET.get("location")
+
+        if query:
+            queryset = queryset.filter(Q(title__icontains=query) | Q(description__icontains=query))
+            
+        if category:
+            queryset = queryset.filter(category__id=category)
+
+        if location:
+            queryset = queryset.filter(location__icontains=location)
+
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.all()
+        return context

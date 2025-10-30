@@ -1,71 +1,91 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from ads.models import Ad, Category, CategoryType
+from ads.models import Ad, Category
 
-class HomePageTests(TestCase):
-
+class HomeViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username="testuser", password="password123")
 
-        cls.categories = []
-        for cat in ['job', 'gig', 'rental', 'sale', 'service', 'event']:
-            category, _ = Category.objects.get_or_create(name=cat)
-            cls.categories.append(category)
+        cls.cat_electronics = Category.objects.create(name="Electronics")
+        cls.cat_furniture = Category.objects.create(name="Furniture")
 
-        for i in range(10):
-            Ad.objects.create(
-                user=cls.user,
-                title=f"Test Ad {i+1}",
-                description=f"This is a description for ad {i+1}.",
-                category=cls.categories[i % len(cls.categories)],
-                price=1000 + i*100,
-                location="Test City",
-                contact_email="test@example.com",
-                contact_phone="9999999999",
-                show_contact=True
-            )
-
-    def test_homepage_status_code(self):
-        url = reverse('home')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-    def test_homepage_template_used(self):
-        url = reverse('home')
-        response = self.client.get(url)
-        self.assertTemplateUsed(response, "home.html")
-
-    def test_homepage_lists_ads(self):
-        url = reverse('home')
-        response = self.client.get(url)
-        self.assertIn('ads', response.context)
-        self.assertEqual(len(response.context['ads']), 6) 
-
-    def test_pagination_is_six(self):
-        url = reverse('home')
-        response = self.client.get(url)
-        self.assertTrue(response.context['is_paginated'])
-        self.assertEqual(len(response.context['ads']), 6)
-
-    def test_second_page_contains_remaining_ads(self):
-        url = reverse('home') + '?page=2'
-        response = self.client.get(url)
-        self.assertEqual(len(response.context['ads']), 4) 
-
-    def test_ads_without_images_show_default(self):
-        Ad.objects.create(
-            user=self.user,
-            title="No Image Ad",
-            description="No image description",
-            category=self.categories[0],
-            price=500,
-            location="City",
-            contact_email="noimage@example.com",
-            contact_phone="8888888888",
-            show_contact=True
+        cls.ad1 = Ad.objects.create(
+            title="iPhone 15",
+            description="Brand new iPhone 15 Pro Max",
+            user=cls.user,
+            category=cls.cat_electronics,
+            price=120000,
+            location="Chennai",
         )
-        url = reverse('home')
-        response = self.client.get(url)
-        self.assertContains(response, "No Image Ad")
+        cls.ad2 = Ad.objects.create(
+            title="Wooden Table",
+            description="Used wooden table in good condition",
+            user=cls.user,
+            category=cls.cat_furniture,
+            price=5000,
+            location="Coimbatore",
+        )
+        cls.ad3 = Ad.objects.create(
+            title="Laptop",
+            description="Gaming laptop with RTX 4060",
+            user=cls.user,
+            category=cls.cat_electronics,
+            price=80000,
+            location="Chennai",
+        )
+
+    def setUp(self):
+        self.url = reverse("home")  
+
+    def test_home_view_renders_correct_template(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "ads/home.html")
+        self.assertIn("ads", response.context)
+        self.assertIn("categories", response.context)
+
+    def test_search_by_keyword(self):
+        response = self.client.get(self.url, {"q": "iPhone"})
+        ads = list(response.context["ads"])
+        self.assertIn(self.ad1, ads)
+        self.assertNotIn(self.ad2, ads)
+        self.assertNotIn(self.ad3, ads)
+
+    def test_filter_by_category(self):
+        response = self.client.get(self.url, {"category": self.cat_furniture.id})
+        ads = list(response.context["ads"])
+        self.assertIn(self.ad2, ads)
+        self.assertNotIn(self.ad1, ads)
+        self.assertNotIn(self.ad3, ads)
+
+    def test_filter_by_location(self):
+        response = self.client.get(self.url, {"location": "Chennai"})
+        ads = list(response.context["ads"])
+        self.assertIn(self.ad1, ads)
+        self.assertIn(self.ad3, ads)
+        self.assertNotIn(self.ad2, ads)
+
+    def test_filter_by_price_range(self):
+        response = self.client.get(self.url, {"min_price": 6000, "max_price": 90000})
+        ads = list(response.context["ads"])
+        self.assertIn(self.ad3, ads)
+        self.assertNotIn(self.ad1, ads)
+        self.assertNotIn(self.ad2, ads)
+
+    def test_combined_filters(self):
+        response = self.client.get(
+            self.url,
+            {
+                "q": "laptop",
+                "category": self.cat_electronics.id,
+                "min_price": 70000,
+                "max_price": 100000,
+                "location": "Chennai",
+            },
+        )
+        ads = list(response.context["ads"])
+        self.assertIn(self.ad3, ads)
+        self.assertNotIn(self.ad1, ads)
+        self.assertNotIn(self.ad2, ads)

@@ -1,6 +1,6 @@
 {% load static %}
 <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden group">
-  <a href="#">
+  <a href="{% url 'ad_detail' ad.pk %}">
     {% if ad.image %}
       <img src="{{ ad.image.url }}" alt="{{ ad.title }}" 
            class="w-full h-64 object-cover transform group-hover:scale-105 transition duration-300">

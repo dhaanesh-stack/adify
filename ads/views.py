@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from .models import Ad
@@ -38,6 +38,10 @@ class AdUpdateView(
         ad = self.get_object()
         return self.request.user == ad.user
 
+class AdDetailView(LoginRequiredMixin,DetailView):
+    model = Ad
+    template_name = 'ads/ad_detail.html'
+    context_object_name = 'ad'
 
 class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Ad

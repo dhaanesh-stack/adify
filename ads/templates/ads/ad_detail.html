@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto my-10 p-6 bg-white shadow-md rounded-lg">
+
+    <h1 class="text-3xl font-bold mb-4">{{ ad.title }}</h1>
+
+    {% if ad.image %}
+    <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-full h-auto mb-6 rounded">
+    {% else %}
+    <div class="w-full h-64 bg-gray-200 flex items-center justify-center mb-6 rounded">
+        <span class="text-gray-500">No Image Available</span>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div><strong>Price:</strong> {{ ad.price|default:"Not specified" }}</div>
+        <div><strong>Location:</strong> {{ ad.location|default:"Not specified" }}</div>
+        <div><strong>Category:</strong> {{ ad.category.name|default:"Not specified" }}</div>
+        {% if ad.event_date %}
+        <div><strong>Event Date:</strong> {{ ad.event_date }}</div>
+        {% endif %}
+        <div><strong>Posted on:</strong> {{ ad.created_at|date:"M d, Y" }}</div>
+    </div>
+
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Description</h2>
+        <p>{{ ad.description|linebreaks }}</p>
+    </div>
+
+    {% if ad.show_contact %}
+    <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-2">Contact Info</h2>
+        {% if ad.contact_email %}
+        <p>Email: <a href="mailto:{{ ad.contact_email }}" class="text-blue-600">{{ ad.contact_email }}</a></p>
+        {% endif %}
+        {% if ad.contact_phone %}
+        <p>Phone: <a href="tel:{{ ad.contact_phone }}" class="text-blue-600">{{ ad.contact_phone }}</a></p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <a href="{% url 'home' %}" class="inline-block mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+        ← Back to Home
+    </a>
+</div>
+{% endblock %}

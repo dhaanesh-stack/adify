@@ -8,7 +8,7 @@
         {% for conv in conversations %}
           <li class="py-3 flex justify-between items-center">
             <div>
-              <a href="#" class="font-medium text-blue-600 hover:underline">{{ conv.ad__title }} - {{ conv.other_user_username }}</a>
+              <a href="{{ conv.chat_url }}" class="font-medium text-blue-600 hover:underline">{{ conv.ad__title }} - {{ conv.other_user_username }}</a>
 
               <p class="text-sm text-gray-500">Last message: {{ conv.last_msg_time|date:'M d, H:i' }}</p>
             </div>

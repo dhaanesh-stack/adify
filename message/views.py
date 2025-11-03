@@ -2,8 +2,6 @@ from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Max, Count, F, Case, When, IntegerField, CharField
 from .models import Message
-from ads.models import Ad
-from django.http import JsonResponse, HttpResponseForbidden
 from django.urls import reverse
 from collections import defaultdict
 from django.utils import timezone
@@ -11,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from .services import send_message
 from django.contrib.auth.views import redirect_to_login
+from .mixins import SellerAccessMixin, BuyerAccessMixin
 
 class InboxView(LoginRequiredMixin, ListView):
     template_name = "message/inbox.html"
@@ -48,32 +47,22 @@ class InboxView(LoginRequiredMixin, ListView):
 User = get_user_model()
 
 
-class AdChatView(LoginRequiredMixin, TemplateView):
+class AdChatView(SellerAccessMixin, BuyerAccessMixin, TemplateView):
     template_name = "message/chat.html"
-
+    user_model = User  
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect_to_login(request.get_full_path())
 
-        self.ad = get_object_or_404(Ad, pk=kwargs["pk"])
-        self.buyer_id = kwargs.get("buyer_id")
-        user = request.user
+        user = self.setup_ad_access(request, *args, **kwargs)
 
-        if user.id == self.ad.user_id and not self.buyer_id:
-            return HttpResponseForbidden()
+        seller_check = self.check_seller_access(user)
+        if seller_check:
+            return seller_check
 
-        if user.id == self.ad.user_id and self.buyer_id:
-            if not User.objects.filter(id=self.buyer_id).exists():
-                return HttpResponseForbidden()
-
-        if user.id != self.ad.user_id:
-            if (
-                Message.objects.filter(ad=self.ad, sender=user).exists()
-                or not self.buyer_id
-            ):
-                pass
-            else:
-                return HttpResponseForbidden()
+        buyer_check = self.check_buyer_access(user)
+        if buyer_check:
+            return buyer_check
 
         return super().dispatch(request, *args, **kwargs)
 

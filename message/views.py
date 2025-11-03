@@ -9,6 +9,8 @@ from collections import defaultdict
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from .services import send_message
+from django.contrib.auth.views import redirect_to_login
 
 class InboxView(LoginRequiredMixin, ListView):
     template_name = "message/inbox.html"
@@ -50,19 +52,15 @@ class AdChatView(LoginRequiredMixin, TemplateView):
     template_name = "message/chat.html"
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+
         self.ad = get_object_or_404(Ad, pk=kwargs["pk"])
         self.buyer_id = kwargs.get("buyer_id")
         user = request.user
 
-        if not user.is_authenticated:
-            from django.contrib.auth.views import redirect_to_login
-
-            return redirect_to_login(request.get_full_path())
-
         if user.id == self.ad.user_id and not self.buyer_id:
-            return JsonResponse(
-                {"error": "You cannot message your own ad."}, status=403
-            )
+            return HttpResponseForbidden()
 
         if user.id == self.ad.user_id and self.buyer_id:
             if not User.objects.filter(id=self.buyer_id).exists():
@@ -113,26 +111,4 @@ class AdChatView(LoginRequiredMixin, TemplateView):
 
 
     def post(self, request, *args, **kwargs):
-        user = request.user
-        content = request.POST.get("content", "").strip()
-        if not content:
-            return JsonResponse({"error": "Message cannot be empty"}, status=400)
-
-        if user.id == self.ad.user_id:
-            if not self.buyer_id:
-                return JsonResponse({"error": "Buyer not specified."}, status=400)
-            receiver = get_object_or_404(User, pk=self.buyer_id)
-        else:
-            receiver = self.ad.user
-
-        msg = Message.objects.create(
-            sender=user, receiver=receiver, ad=self.ad, content=content
-        )
-
-        return JsonResponse(
-            {
-                "sender": msg.sender.username,
-                "content": msg.content,
-                "timestamp": msg.timestamp.strftime("%H:%M"),
-            }
-        )
+        return send_message(request, self.ad, self.buyer_id)

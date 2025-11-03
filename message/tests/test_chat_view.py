@@ -31,19 +31,23 @@ class AdChatViewTests(TestCase):
         )
 
     def test_login_required(self):
-        url = reverse("chat_ad", kwargs={"pk": self.ad_user1.id})
+        url = reverse("chat_ad_seller", kwargs={"pk": self.ad_user1.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302)
 
     def test_user_cannot_chat_own_ad(self):
         self.client.login(username="user1", password="pass123")
-        url = reverse("chat_ad", kwargs={"pk": self.ad_user1.id})
+        url = reverse("chat_ad_seller", kwargs={"pk": self.ad_user1.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
 
     def test_user_can_chat_on_others_ad(self):
         self.client.login(username="user1", password="pass123")
-        url = reverse("chat_ad", kwargs={"pk": self.ad_user2.id})
-        response = self.client.post(url, {"content": "Hi there"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        url = reverse("chat_ad_seller", kwargs={"pk": self.ad_user2.id})
+        response = self.client.post(
+            url,
+            {"content": "Hi there"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Message.objects.filter(content="Hi there").exists())

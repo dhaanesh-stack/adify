@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'ads',
     'message',
     'users',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

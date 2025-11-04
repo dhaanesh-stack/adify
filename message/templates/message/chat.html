@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-4 mt-6">
+
+  <div class="flex items-center border-b pb-3 mb-4">
+    {% if ad.image %}
+      <img src="{{ ad.image.url }}" alt="{{ ad.title }}" class="w-16 h-16 object-cover rounded mr-3">
+    {% endif %}
+    <div>
+    </div>
+  </div>
+
+  <div id="chat-box" class="h-80 overflow-y-auto p-3 space-y-2 bg-gray-50 border rounded"
+       data-user-id="{{ request.user.id }}" data-chat-partner-id="{% if chat_partner %}{{ chat_partner.id }}{% endif %}">
+  {% for date, messages in grouped_messages %}
+    <div class="text-center text-gray-500 text-sm my-2">
+      {{ date|date:"F j, Y" }}
+    </div>
+
+    {% for message in messages %}
+      <div class="flex {% if message.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+        <div class="message-bubble max-w-xs break-words px-4 py-2 rounded-2xl
+                    {% if message.sender == request.user %}
+                      bg-indigo-500 text-white rounded-tr-none
+                    {% else %}
+                      bg-gray-300 rounded-tl-none
+                    {% endif %}" data-id="{{ message.id }}">
+          {% if message.sender != request.user %}
+            <strong>{{ message.sender.username }}</strong><br>
+          {% endif %}
+          {{ message.content }}
+          <div class="text-xs text-gray-400 mt-1 text-right">
+            {% if message.sender == request.user %}You{% else %}{{ message.sender.username }}{% endif %}
+            • {{ message.timestamp|date:"H:i" }}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% empty %}
+    <p id="no-messages" class="text-gray-500 text-center mt-20">No messages yet. Say hello!</p>
+  {% endfor %}
+</div>
+
+
+  <form id="message-form" class="mt-4 flex" method="post" action="">
+    {% csrf_token %}
+    <input type="text" name="content" id="message-input" placeholder="Type a message..."
+           class="flex-1 border rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" autocomplete="off">
+    <button type="submit"
+            class="bg-indigo-600 text-white px-4 rounded-r-lg hover:bg-indigo-700 transition">
+      Send
+    </button>
+  </form>
+
+</div>
+
+<template id="message-template">
+  <div class="flex justify-end">
+    <div class="message-bubble max-w-xs break-words px-4 py-2 rounded-2xl bg-indigo-500 text-white rounded-tr-none" data-id="">
+      <span class="message-text"></span>
+      <div class="text-xs text-gray-400 mt-1 text-right meta-text"></div>
+    </div>
+  </div>
+</template>
+
+<script src="{% static 'message/js/chat.js' %}"></script>
+{% endblock %}

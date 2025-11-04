@@ -1,7 +1,15 @@
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Max, Count, F, Case, When, IntegerField, CharField
 from .models import Message
+from django.urls import reverse
+from collections import defaultdict
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from .services import send_message
+from django.contrib.auth.views import redirect_to_login
+from .mixins import SellerAccessMixin, BuyerAccessMixin
 
 class InboxView(LoginRequiredMixin, ListView):
     template_name = "message/inbox.html"
@@ -31,5 +39,65 @@ class InboxView(LoginRequiredMixin, ListView):
             unread_count=Count("id", filter=Q(is_read=False, receiver=user))
         ).order_by("-last_msg_time")
 
+        for conv in conversations:
+            conv["chat_url"] = reverse("chat_ad_seller", args=[conv["ad_id"], conv["other_user_id"]])
+
         return conversations
     
+User = get_user_model()
+
+
+class AdChatView(SellerAccessMixin, BuyerAccessMixin, TemplateView):
+    template_name = "message/chat.html"
+    user_model = User  
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+
+        user = self.setup_ad_access(request, *args, **kwargs)
+
+        seller_check = self.check_seller_access(user)
+        if seller_check:
+            return seller_check
+
+        buyer_check = self.check_buyer_access(user)
+        if buyer_check:
+            return buyer_check
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        chat_partner = None
+        if user == self.ad.user:
+            if self.buyer_id:
+                chat_partner = get_object_or_404(User, pk=self.buyer_id)
+        else:
+            chat_partner = self.ad.user
+
+        context["chat_partner"] = chat_partner
+
+        if chat_partner:
+            messages = (
+                Message.objects.filter(ad=self.ad)
+                .filter(Q(sender=user, receiver=chat_partner) | Q(sender=chat_partner, receiver=user))
+                .order_by("timestamp")
+            )
+            messages.filter(receiver=user, is_read=False).update(is_read=True)
+        else:
+            messages = Message.objects.none()
+
+        grouped_messages = defaultdict(list)
+        for msg in messages:
+            local_date = timezone.localtime(msg.timestamp).date()
+            grouped_messages[local_date].append(msg)
+
+        context["ad"] = self.ad
+        context["grouped_messages"] = sorted(grouped_messages.items(), key=lambda item: item[0])
+        return context
+
+
+    def post(self, request, *args, **kwargs):
+        return send_message(request, self.ad, self.buyer_id)

@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from ads.models import Ad, Category
 
+
 class HomeViewTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -37,7 +38,7 @@ class HomeViewTests(TestCase):
         )
 
     def setUp(self):
-        self.url = reverse("home") 
+        self.url = reverse("home")
 
     def test_home_view_renders_correct_template(self):
         response = self.client.get(self.url)
@@ -45,6 +46,7 @@ class HomeViewTests(TestCase):
         self.assertTemplateUsed(response, "ads/home.html")
         self.assertIn("ads", response.context)
         self.assertIn("categories", response.context)
+        self.assertIn("filter", response.context)  
 
     def test_search_by_keyword(self):
         response = self.client.get(self.url, {"q": "iPhone"})

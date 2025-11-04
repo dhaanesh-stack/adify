@@ -34,7 +34,7 @@ class CustomUserCreationForm(UserCreationForm):
             field.widget.attrs.update({
                 "class": INPUT_CLS,
                 "placeholder": placeholder_map.get(name, ""),
-                "autocomplete": "off" if name in ("password1", "password2") else "on",
+                "autocomplete": "new-password" if name in ("password1", "password2") else "on",
             })
 
 
@@ -53,16 +53,21 @@ class CustomAuthenticationForm(AuthenticationForm):
             field.widget.attrs.update({
                 "class": INPUT_CLS,
                 "placeholder": placeholder_map.get(name, ""),
+                "autocomplete": "current-password" if name == "password" else "username",
             })
 
 
 class CustomPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["email"].widget.attrs.update({
-            "class": INPUT_CLS,
-            "placeholder": "Enter your registered email address",
-        })
+        placeholder_map = {
+            "email": "Enter your registered email address",
+        }
+        for name, field in self.fields.items():
+            field.widget.attrs.update({
+                "class": INPUT_CLS,
+                "placeholder": placeholder_map.get(name, ""),
+            })
 
 
 class CustomSetPasswordForm(SetPasswordForm):
@@ -78,5 +83,5 @@ class CustomSetPasswordForm(SetPasswordForm):
             field.widget.attrs.update({
                 "class": INPUT_CLS,
                 "placeholder": placeholder_map.get(name, ""),
-                "autocomplete": "off",
+                "autocomplete": "new-password",
             })

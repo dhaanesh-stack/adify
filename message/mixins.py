@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404
 from ads.models import Ad
 from .models import Message
@@ -14,9 +14,15 @@ class SellerAccessMixin(AdAccessMixin):
     def check_seller_access(self, user):
         if user.id == self.ad.user_id:
             if not self.buyer_id:
-                return HttpResponseForbidden()
-            if self.buyer_id and not self.user_model.objects.filter(id=self.buyer_id).exists():
-                return HttpResponseForbidden()
+                return Http404()
+            try:
+                buyer_id_int = int(self.buyer_id)
+            except (TypeError, ValueError):
+                return Http404()
+            if buyer_id_int == user.id:
+                return Http404()
+            if self.buyer_id and not self.user_model.objects.filter(id=buyer_id_int).exists():
+                return Http404()
         return None
 
 class BuyerAccessMixin(AdAccessMixin):

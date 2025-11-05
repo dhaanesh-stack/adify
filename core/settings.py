@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'message',
     'users',
     'django_filters',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

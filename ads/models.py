@@ -36,6 +36,7 @@ class Ad(models.Model):
     event_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['-created_at']

@@ -4,6 +4,9 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
 from .models import Ad
 from .forms import AdForm
+from django.views import View
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
 
 class MyAdsView(LoginRequiredMixin, ListView):
     model = Ad
@@ -52,3 +55,16 @@ class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         ad = self.get_object()
         return self.request.user == ad.user
+
+class MarkSoldAdView(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        self.ad = get_object_or_404(Ad, pk=self.kwargs['pk'])
+        return self.ad.user == self.request.user  
+
+    def post(self, request, *args, **kwargs):
+        self.ad.is_active = not self.ad.is_active
+        self.ad.save()
+
+        status = "active" if self.ad.is_active else "sold"
+        messages.success(request, f"Ad marked as {status}.")
+        return redirect('my_ads')

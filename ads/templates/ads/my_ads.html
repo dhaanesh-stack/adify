@@ -11,6 +11,15 @@
             <div class="px-5 pb-4 flex justify-between text-sm border-t pt-3">
               <a href="{% url 'edit_ad' ad.pk %}" class="text-blue-600 hover:text-green-700 transition duration-300">Edit</a>
               <a href="{% url 'delete_ad' ad.pk %}" class="text-sm text-red-600 hover:underline">Delete</a>
+              <form method="post" action="{% url 'mark_sold_ad' ad.pk %}" class="inline">
+                  {% csrf_token %}
+                  {% if ad.is_active %}
+                      <button type="submit" class="text-yellow-600 hover:underline">Mark as Sold</button>
+                  {% else %}
+                      <button type="submit" class="text-green-600 hover:underline">Reopen</button>
+                  {% endif %}
+              </form>
+
             </div>
           </div>
         {% endfor %}

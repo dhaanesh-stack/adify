@@ -32,5 +32,7 @@ class SellerAccessMixin(AdAccessMixin):
 class BuyerAccessMixin(AdAccessMixin):
     def check_buyer_access(self, user):
         if user.id != self.ad.user_id:
+            if self.buyer_id and not Message.objects.filter(ad=self.ad, sender=user).exists():
+                return HttpResponseForbidden()
             return None
         return None

@@ -62,9 +62,14 @@ class MarkSoldAdView(LoginRequiredMixin, UserPassesTestMixin, View):
         return self.ad.user == self.request.user  
 
     def post(self, request, *args, **kwargs):
-        self.ad.is_active = not self.ad.is_active
-        self.ad.save()
+        from django.db.models import Case, When, Value
+        Ad.objects.filter(pk=self.ad.pk).update(is_active=Case(
+            When(is_active=True, then=Value(False)),
+            default=Value(True)
+        ))
+        self.ad.refresh_from_db()
 
         status = "active" if self.ad.is_active else "sold"
         messages.success(request, f"Ad marked as {status}.")
         return redirect('my_ads')
+    

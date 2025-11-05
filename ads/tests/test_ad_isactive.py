@@ -6,11 +6,9 @@ from django.contrib.messages import get_messages
 
 class MarkSoldAdViewTests(TestCase):
     def setUp(self):
-        # Create users
         self.owner = User.objects.create_user(username='owner', password='pass')
         self.other_user = User.objects.create_user(username='other', password='pass')
 
-        # Create an active ad
         self.ad = Ad.objects.create(
             title="Test Ad",
             description="Test description",

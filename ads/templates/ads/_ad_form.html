@@ -1,3 +1,4 @@
+{% load widget_tweaks %}
 <div 
   x-data="{
     category: '{{ form.category.value|default:'' }}',
@@ -10,7 +11,7 @@
 
   <div>
     <label for="id_title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-    {{ form.title }}
+    {{ form.title | add_class:"w-full border border-gray-300 rounded-md p-2 outline-none focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-500"| attr:"placeholder:Enter ad title"}}
   </div>
 
   <div>
@@ -26,22 +27,21 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <div>
       <label for="id_category" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-      <!-- bind to Alpine.js -->
       <div x-on:change="category = $event.target.options[$event.target.selectedIndex].text.toLowerCase()">
-        {{ form.category }}
+        {{ form.category | add_class:"w-full border border-gray-300 rounded-md p-2 outline-none focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-500"}}
       </div>
     </div>
 
     <div>
       <label for="id_price" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
-      {{ form.price }}
+      {{ form.price|add_class:"w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"|attr:"placeholder:Enter price"  }}
     </div>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <div>
       <label for="id_location" class="block text-sm font-medium text-gray-700 mb-1">Location*</label>
-      {{ form.location }}
+      {{ form.location | add_class:"w-full border border-gray-300 rounded-md p-2 outline-none focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-500" |attr:"placeholder:Enter location"}}
     </div>
 
     <div id="event-date-container" x-show="isEvent()" x-transition>
@@ -64,12 +64,12 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <div>
       <label for="id_contact_email" class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
-      {{ form.contact_email }}
+      {{ form.contact_email | add_class:"w-full border border-gray-300 rounded-md p-2 outline-none focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-500" |attr:"placeholder:Enter email" }}
     </div>
 
     <div>
       <label for="id_contact_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-      {{ form.contact_phone }}
+      {{ form.contact_phone | add_class:"w-full border border-gray-300 rounded-md p-2 outline-none focus:outline-indigo-500 focus:ring-2 focus:ring-indigo-500" |attr:"placeholder:Enter phone number"}}
     </div>
   </div>
 

@@ -3,6 +3,26 @@ document.addEventListener('alpine:init', () => {
     content: '',
     csrf: document.querySelector('[name=csrfmiddlewaretoken]').value,
     lastMessageId: null,
+    
+    createMessageElement(msg, isOwn = false) {
+      const template = document.getElementById('message-template');
+      const clone = template.content.cloneNode(true);
+      const bubble = clone.querySelector('.message-bubble');
+      const wrapper = clone.querySelector('.flex');
+
+      clone.querySelector('.message-text').textContent = msg.content;
+      clone.querySelector('.meta-text').textContent = `${isOwn ? 'You' : msg.sender_name} • ${msg.timestamp}`;
+      bubble.dataset.id = msg.id;
+
+      if (!isOwn && msg.sender_name !== 'You') {
+        wrapper.classList.remove('justify-end');
+        wrapper.classList.add('justify-start');
+        bubble.classList.remove('bg-indigo-500', 'text-white', 'rounded-tr-none');
+        bubble.classList.add('bg-gray-300', 'rounded-tl-none');
+      }
+
+      return clone;
+    },
 
     async sendMessage() {
       if (!this.content.trim()) return;
@@ -18,11 +38,7 @@ document.addEventListener('alpine:init', () => {
 
       if (response.ok) {
         const data = await response.json();
-        const template = document.getElementById('message-template');
-        const clone = template.content.cloneNode(true);
-
-        clone.querySelector('.message-text').textContent = data.content;
-        clone.querySelector('.meta-text').textContent = `You • ${data.timestamp}`;
+        const clone = this.createMessageElement(data, true);
 
         this.$refs.chatBox.appendChild(clone);
         this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
@@ -43,24 +59,10 @@ document.addEventListener('alpine:init', () => {
         if (data.length === 0) return;
 
         data.forEach(msg => {
-          const template = document.getElementById('message-template');
-          const clone = template.content.cloneNode(true);
-          const bubble = clone.querySelector('.message-bubble');
-          const wrapper = clone.querySelector('.flex');
-
-          clone.querySelector('.message-text').textContent = msg.content;
-          clone.querySelector('.meta-text').textContent = `${msg.sender_name} • ${msg.timestamp}`;
-          bubble.dataset.id = msg.id;
-
-          if (msg.sender_name !== 'You') {
-            wrapper.classList.remove('justify-end');
-            wrapper.classList.add('justify-start');
-            bubble.classList.remove('bg-indigo-500', 'text-white', 'rounded-tr-none');
-            bubble.classList.add('bg-gray-300', 'rounded-tl-none');
-          }
-
+          const clone = this.createMessageElement(msg);
           this.$refs.chatBox.appendChild(clone);
         });
+
 
         this.lastMessageId = data[data.length - 1].id;
         this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
@@ -80,9 +82,12 @@ document.addEventListener('alpine:init', () => {
 
       this.lastMessageId = chatBox.querySelector('.message-bubble:last-child')?.dataset.id || null;
 
-      setInterval(() => {
-        this.fetchNewMessages();
-      }, 3000);
+      const poll = () => { 
+        this.fetchNewMessages().finally(() => {
+          setTimeout(poll, 3000); 
+        }); 
+      }; 
+      poll();
     }
   }));
 });

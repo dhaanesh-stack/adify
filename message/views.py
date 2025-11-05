@@ -65,22 +65,23 @@ class AdChatView(SellerAccessMixin, BuyerAccessMixin, TemplateView):
         if buyer_check:
             return buyer_check
 
-        # ✅ Polling check (for AJAX refresh)
         if request.headers.get("X-Requested-With") == "XMLHttpRequest" and request.GET.get("poll"):
             return self.handle_polling(request)
         return super().dispatch(request, *args, **kwargs)
     
+    def _get_chat_partner(self, user):
+        if user == self.ad.user:
+            if self.buyer_id:
+                return get_object_or_404(User, pk=self.buyer_id)
+        else:
+            return self.ad.user
+        return None
+
     def handle_polling(self, request):
-        """Handle AJAX polling for new chat messages."""
         user = request.user
         last_id = request.GET.get("last_id")
 
-        chat_partner = None
-        if user == self.ad.user:
-            if self.buyer_id:
-                chat_partner = get_object_or_404(User, pk=self.buyer_id)
-        else:
-            chat_partner = self.ad.user
+        chat_partner = self._get_chat_partner(user)
 
         if not chat_partner:
             return JsonResponse([], safe=False)
@@ -110,12 +111,7 @@ class AdChatView(SellerAccessMixin, BuyerAccessMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        chat_partner = None
-        if user == self.ad.user:
-            if self.buyer_id:
-                chat_partner = get_object_or_404(User, pk=self.buyer_id)
-        else:
-            chat_partner = self.ad.user
+        chat_partner = self._get_chat_partner(user)
 
         context["chat_partner"] = chat_partner
 

@@ -14,7 +14,6 @@ class HomeView(FilterView):
             Ad.objects.select_related("user", "category")
             .only("title", "description", "price", "location", "image", "created_at", "user__username", "category__name")
             .order_by("-created_at")
-            .filter(is_active=True)
         )
         return self.filterset_class(self.request.GET, queryset=queryset).qs
 

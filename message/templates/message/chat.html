@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-4 mt-6">
+<div  x-data="chatComponent()" x-init="initChat()" class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-4 mt-6">
 
   <div class="flex items-center border-b pb-3 mb-4">
     {% if ad.image %}
@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div id="chat-box" class="h-80 overflow-y-auto p-3 space-y-2 bg-gray-50 border rounded"
+  <div id="chat-box" x-ref="chatBox" class="h-80 overflow-y-auto p-3 space-y-2 bg-gray-50 border rounded"
        data-user-id="{{ request.user.id }}" data-chat-partner-id="{% if chat_partner %}{{ chat_partner.id }}{% endif %}">
   {% for date, messages in grouped_messages %}
     <div class="text-center text-gray-500 text-sm my-2">
@@ -44,9 +44,9 @@
 </div>
 
 
-  <form id="message-form" class="mt-4 flex" method="post" action="">
+  <form id="message-form" class="mt-4 flex" method="post" @submit.prevent="sendMessage">
     {% csrf_token %}
-    <input type="text" name="content" id="message-input" placeholder="Type a message..."
+    <input type="text" name="content" id="message-input" x-model="content" placeholder="Type a message..."
            class="flex-1 border rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" autocomplete="off">
     <button type="submit"
             class="bg-indigo-600 text-white px-4 rounded-r-lg hover:bg-indigo-700 transition">

@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from .services import send_message
 from django.contrib.auth.views import redirect_to_login
 from .mixins import SellerAccessMixin, BuyerAccessMixin
+from django.http import JsonResponse
 
 class InboxView(LoginRequiredMixin, ListView):
     template_name = "message/inbox.html"
@@ -64,7 +65,46 @@ class AdChatView(SellerAccessMixin, BuyerAccessMixin, TemplateView):
         if buyer_check:
             return buyer_check
 
+        # ✅ Polling check (for AJAX refresh)
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest" and request.GET.get("poll"):
+            return self.handle_polling(request)
         return super().dispatch(request, *args, **kwargs)
+    
+    def handle_polling(self, request):
+        """Handle AJAX polling for new chat messages."""
+        user = request.user
+        last_id = request.GET.get("last_id")
+
+        chat_partner = None
+        if user == self.ad.user:
+            if self.buyer_id:
+                chat_partner = get_object_or_404(User, pk=self.buyer_id)
+        else:
+            chat_partner = self.ad.user
+
+        if not chat_partner:
+            return JsonResponse([], safe=False)
+
+        messages = (
+            Message.objects.filter(ad=self.ad)
+            .filter(Q(sender=user, receiver=chat_partner) | Q(sender=chat_partner, receiver=user))
+            .order_by("id")
+        )
+
+        if last_id and last_id.isdigit():
+            messages = messages.filter(id__gt=int(last_id))
+
+        data = [
+            {
+                "id": msg.id,
+                "content": msg.content,
+                "sender_name": "You" if msg.sender == user else msg.sender.username,
+                "timestamp": timezone.localtime(msg.timestamp).strftime("%H:%M"),
+            }
+            for msg in messages
+        ]
+
+        return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

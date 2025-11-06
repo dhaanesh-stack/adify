@@ -19,6 +19,7 @@ class AdFilter(django_filters.FilterSet):
         label='',
         widget=django_filters.widgets.forms.Select(
             attrs={
+                "onchange": "this.form.submit()",
                 "class": "w-full md:w-48 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500",
             }
         ),

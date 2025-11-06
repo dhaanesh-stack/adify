@@ -38,7 +38,7 @@
     Sold
   </span>
 {% endif %}
-  {% if request.user.is_authenticated and ad.user == request.user %}
+  {% if request.resolver_match.view_name != 'my_ads' and request.user.is_authenticated and ad.user == request.user %}
       <span class="absolute top-2 left-2 text-xs text-indigo-900 bg-indigo-100 px-2 py-1 rounded-full">
         Posted by you
       </span>

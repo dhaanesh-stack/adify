@@ -15,6 +15,8 @@ class HomeView(FilterView):
             .only("title", "description", "price", "location", "image", "created_at", "user__username", "category__name")
             .order_by("-created_at")
         )
+        if self.request.GET.get("hide_sold"):
+            queryset = queryset.filter(is_active=True)
         return self.filterset_class(self.request.GET, queryset=queryset).qs
 
     def get_context_data(self, **kwargs):

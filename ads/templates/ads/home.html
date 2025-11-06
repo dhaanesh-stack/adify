@@ -16,26 +16,32 @@
   </button>
 </form>
 
-<div class="max-w-7xl mx-auto px-4 py-8" x-data="{ showSold: false }">
+<div class="max-w-7xl mx-auto px-4 py-8" >
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-semibold">Latest Ads</h1>
 
-    <label class="flex items-center space-x-2 cursor-pointer">
-      <span class="text-sm text-gray-700">Show Sold Ads</span>
-      <input
-        type="checkbox"
-        x-model="showSold"
-        class="form-checkbox h-4 w-4 text-indigo-600 rounded"
-      >
-    </label>
+  <form method="get" class="flex items-center space-x-2">
+  <input type="hidden" name="page" value="{{ page_obj.number }}">
+  <label for="hide_sold" class="text-sm text-gray-700">Hide Sold Ads</label>
+  <input
+    type="checkbox"
+    name="hide_sold"
+    value="1"
+    id="hide_sold"
+    class="form-checkbox h-4 w-4 text-indigo-600 rounded"
+    onchange="this.form.submit()"
+    {% if request.GET.hide_sold %}checked{% endif %}
+  >
+</form>
+
   </div>
 
   {% if ads %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {% for ad in ads %}
-        <template x-if="showSold || {{ ad.is_active|yesno:'true,false' }}">
+        
             {% include "ads/_ad_card.html" %}
-        </template>
+        
       {% endfor %}
     </div>
 

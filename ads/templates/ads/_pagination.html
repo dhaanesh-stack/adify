@@ -2,7 +2,7 @@
 {% if is_paginated %}
   <div class="flex justify-center items-center mt-10 space-x-2">
     {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}" 
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.hide_sold %}&hide_sold=1{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}"
          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
         Previous
       </a>
@@ -13,7 +13,7 @@
     </span>
 
     {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}" 
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET.hide_sold %}&hide_sold=1{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}"
          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
         Next
       </a>

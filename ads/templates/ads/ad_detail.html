@@ -49,5 +49,20 @@
        <span class="text-gray-500">This is your ad</span>
       {% endif %}
 </div>
+{% if user == ad.user %}
+  <div class="mt-6 border-t pt-4 flex flex-wrap gap-4 justify-center text-sm">
+    <a href="{% url 'edit_ad' ad.pk %}" class="text-blue-600 hover:text-green-700 transition duration-300">Edit</a>
+    <a href="{% url 'delete_ad' ad.pk %}" class="text-red-600 hover:text-green-700 transition duration-300">Delete</a>
+    <form method="post" action="{% url 'mark_sold_ad' ad.pk %}" class="inline">
+      {% csrf_token %}
+      {% if ad.is_active %}
+        <button type="submit" class="text-yellow-600 hover:text-green-700 transition duration-300">Mark as Sold</button>
+      {% else %}
+        <button type="submit" class="text-green-600 hover:text-yellow-600 transition duration-300">Reopen</button>
+      {% endif %}
+    </form>
+  </div>
+{% endif %}
+
 </div>
 {% endblock %}

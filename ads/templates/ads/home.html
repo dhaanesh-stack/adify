@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load widget_tweaks %}
 {% block title %}Home - Adify{% endblock %}
 
 {% block content %}
 
-<form method="get" class="flex flex-wrap gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm">
+<form 
+  method="get"
+  class="flex flex-wrap gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm"
+  x-data="{ category: '{{ filter.form.category.value|default:'' }}' }"
+  x-init="$watch('category', value => $refs.form.submit())"
+  x-ref="form"
+>
   {{ filter.form.q }}
-  {{ filter.form.category }}
+  {{ filter.form.category| attr:"x-model=category" }}
   {{ filter.form.location }}
   {{ filter.form.min_price }}
   {{ filter.form.max_price }}

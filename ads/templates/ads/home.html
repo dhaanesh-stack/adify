@@ -20,18 +20,23 @@
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-semibold">Latest Ads</h1>
 
-  <form method="get" class="flex items-center space-x-2">
+  <form method="get" class="flex items-center space-x-4">
   <input type="hidden" name="page" value="{{ page_obj.number }}">
-  <label for="hide_sold" class="text-sm text-gray-700">Hide Sold Ads</label>
-  <input
-    type="checkbox"
-    name="hide_sold"
-    value="1"
-    id="hide_sold"
-    class="form-checkbox h-4 w-4 text-indigo-600 rounded"
-    onchange="this.form.submit()"
-    {% if request.GET.hide_sold %}checked{% endif %}
-  >
+  <div class="flex items-center space-x-2">
+    <span class="text-sm text-gray-700 font-medium">Show Available</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input
+        type="checkbox"
+        name="hide_sold"
+        value="1"
+        class="sr-only peer"
+        onchange="this.form.submit()"
+        {% if request.GET.hide_sold %}checked{% endif %}
+      >
+      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer-checked:bg-indigo-600 transition-all duration-300"></div>
+      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md peer-checked:translate-x-5 transition-transform duration-300"></div>
+    </label>
+  </div>
 </form>
 
   </div>
@@ -39,9 +44,7 @@
   {% if ads %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {% for ad in ads %}
-        
             {% include "ads/_ad_card.html" %}
-        
       {% endfor %}
     </div>
 

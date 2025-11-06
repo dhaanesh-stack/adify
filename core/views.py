@@ -23,4 +23,8 @@ class HomeView(FilterView):
         context = super().get_context_data(**kwargs)
         context["categories"] = Category.objects.all()
         context["filter"] = self.filterset_class(self.request.GET, queryset=self.get_queryset())
+        params = self.request.GET.copy()
+        if "page" in params:
+            params.pop("page")
+        context["filter_params"] = params.urlencode()
         return context

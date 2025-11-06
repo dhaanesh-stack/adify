@@ -16,14 +16,28 @@
   </button>
 </form>
 
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="{ showSold: false }">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-semibold">Latest Ads</h1>
 
-<div class="max-w-7xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-semibold text-center mb-8">Latest Ads</h1>
+    <label class="flex items-center space-x-2 cursor-pointer">
+      <span class="text-sm text-gray-700">Show Sold Ads</span>
+      <input
+        type="checkbox"
+        x-model="showSold"
+        class="form-checkbox h-4 w-4 text-indigo-600 rounded"
+      >
+    </label>
+  </div>
 
   {% if ads %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {% for ad in ads %}
-        {% include "ads/_ad_card.html" %}
+        <template x-if="showSold || {{ ad.is_active|yesno:'true,false' }}">
+          <div>
+            {% include "ads/_ad_card.html" %}
+          </div>
+        </template>
       {% endfor %}
     </div>
 

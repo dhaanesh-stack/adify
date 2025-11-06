@@ -44,10 +44,35 @@
         ← Back to Home
     </a>
     {% if user != ad.user %}
-       <a href="{% url 'chat_ad_seller' ad.pk %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Contact Seller</a>
-     {% else %}
-       <span class="text-gray-500">This is your ad</span>
+    <a href="{% url 'chat_ad_seller' ad.pk %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+        Contact Seller
+    </a>
+{% else %}
+  <div class="mt-6 flex flex-wrap items-center gap-4 justify-start">
+    <a href="{% url 'edit_ad' ad.pk %}" 
+       class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 hover:text-blue-800 transition duration-300">
+      Edit
+    </a>
+    <a href="{% url 'delete_ad' ad.pk %}" 
+       class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 hover:text-red-800 transition duration-300">
+      Delete
+    </a>
+    <form method="post" action="{% url 'mark_sold_ad' ad.pk %}" class="inline">
+      {% csrf_token %}
+      {% if ad.is_active %}
+        <button type="submit" 
+                class="px-4 py-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 hover:text-yellow-800 transition duration-300">
+          Mark as Sold
+        </button>
+      {% else %}
+        <button type="submit" 
+                class="px-4 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 hover:text-green-800 transition duration-300">
+          Reopen
+        </button>
       {% endif %}
-</div>
+    </form>
+  </div>
+{% endif %}
+
 </div>
 {% endblock %}

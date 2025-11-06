@@ -1,5 +1,5 @@
 {% load static %}
-<div class="rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden group
+<div class="relative rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden group
             {% if not ad.is_active %}filter grayscale opacity-70 border-2 border-red-300{% else %}border border-transparent{% endif %}">
 
   <a href="{% url 'ad_detail' ad.pk %}">
@@ -38,6 +38,10 @@
     Sold
   </span>
 {% endif %}
-
+  {% if request.resolver_match.view_name != 'my_ads' and request.user.is_authenticated and ad.user == request.user %}
+      <span class="absolute top-2 left-2 text-xs text-indigo-900 bg-indigo-100 px-2 py-1 rounded-full">
+        Posted by you
+      </span>
+    {% endif %}
   </div>
 </div>
